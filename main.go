@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/ashishgalagali/go-git-churn/cmd"
 	"runtime"
 )
 
@@ -23,5 +24,5 @@ func main() {
 	//For executing the concurrent go routines in the program parallelly
 	numcpu := runtime.NumCPU()
 	runtime.GOMAXPROCS(numcpu)
-	//cmd.Execute()
+	cmd.Execute()
 }

@@ -3,6 +3,6 @@
 repos/*
 !repos/.gitkeep
 .idea/
-git-churn
+go-git-churn
 logs/
 .DS_Store
