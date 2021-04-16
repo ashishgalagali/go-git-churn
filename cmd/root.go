@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ashishgalagali/go-git-churn/metrics"
-	"github.com/go-git/go-git/plumbing"
-	"github.com/spf13/cobra"
 	"github.com/ashishgalagali/go-git-churn/helper"
+	"github.com/ashishgalagali/go-git-churn/metrics"
+	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/spf13/cobra"
 	//"io/ioutil"
 	"os"
 	"strings"
