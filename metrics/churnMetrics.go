@@ -5,7 +5,7 @@ import (
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/plumbing"
 	"github.com/go-git/go-git/storage/memory"
-	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git"
 	"os"
 	//"time"
 )
