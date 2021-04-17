@@ -6,7 +6,7 @@ A fast tool for collecting code churn metrics from git repositories.
 You will need Go language installed on your system. Ref: https://golang.org/doc/install
 
 ```
-   git clone github.com/ashishgalagali/go-git-churn
+   git clone https://github.com/ashishgalagali/go-git-churn
    cd go-git-churn
    go install github.com/ashishgalagali/go-git-churn
    go build
