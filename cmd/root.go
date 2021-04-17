@@ -19,7 +19,7 @@ func init() {
 	////print.CheckIfError(cobra.MarkFlagRequired(pf, "commit"))
 	//pf.StringVarP(&filepath, "filepath", "f", "", "File path for the file on which the commit metrics has to be computed")
 	//pf.StringVarP(&aggregate, "aggregate", "a", "", "Aggregate the churn metrics. \"commit\": Aggregates all files in a commit. \"all\": Aggregate all files all commits and all files")
-	//pf.BoolVarP(&whitespace, "whitespace", "w", true, "Excludes whitespaces while calculating the churn metrics is set to false")
+	//pf.BoolVarP(&whitespace git-churn, "whitespace", "w", true, "Excludes whitespaces while calculating the churn metrics is set to false")
 	//pf.BoolVarP(&jsonOPToFile, "json", "j", false, "Writes the JSON output to a file within a folder named churn-details")
 	//pf.BoolVarP(&printOP, "print", "p", true, "Prints the output in a human readable format")
 	//pf.BoolVarP(&enableLog, "logging", "l", false, "Enables logging. Defaults to false")
@@ -36,10 +36,10 @@ var (
 	//enableLog    bool
 
 	rootCmd = &cobra.Command{
-		Use:   "git-churn",
+		Use:   "go-git-churn",
 		Short: "A fast tool for collecting code churn metrics from git repositories.",
-		Long: `git-churn gives the churn metrics like insertions, deletions, etc for the given commit hash in the repo specified.
-               Complete documentation is available at https://github.com/andymeneely/git-churn`,
+		Long: `go-git-churn gives the churn metrics like self-churn, interactive-churn for the given repo.
+               Complete documentation is available at https://github.com/ashishgalagali/go-git-churn`,
 		Run: func(cmd *cobra.Command, args []string) {
 			//if !enableLog {
 			//	helper.INFO.SetFlags(0)
@@ -90,10 +90,10 @@ var (
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version number of git-churn",
-	Long:  `All software has versions. This is git-churn's`,
+	Short: "Print the version number of go-git-churn",
+	Long:  `All software has versions. This is go-git-churn's`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("git-churn version 0.1")
+		fmt.Println("go-git-churn version 1.0")
 	},
 }
 

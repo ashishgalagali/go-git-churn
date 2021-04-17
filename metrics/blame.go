@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/ashishgalagali/go-git-churn/helper"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/utils/diff"
@@ -222,7 +223,7 @@ func (b *blame) fillGraphAndData() error {
 
 	// for every revision of the file, starting with the first
 	// one...
-
+	helper.AppendToFile("outputs/output.json", "[")
 	for i, rev := range b.revs {
 		//cTree, _ := rev.Tree()
 		//if rev.Hash.String() == "e15b720263903680264fdfb124749b6f386d51e6" {
@@ -329,10 +330,15 @@ func (b *blame) fillGraphAndData() error {
 			ChurnFiles:    commitFiles,
 		}
 		data, _ := json.Marshal(churn)
-		fmt.Printf("%s\n", data)
-		fmt.Println("\n")
+		if i != 0 {
+			helper.AppendToFile("outputs/output.json", ",")
+		}
+		helper.AppendToFile("outputs/output.json", string(data)+"\n")
+		//fmt.Printf("%s\n", data)
+		//fmt.Println("\n")
 		//}
 	}
+	helper.AppendToFile("outputs/output.json", "]")
 	return nil
 }
 
@@ -399,7 +405,7 @@ func (b *blame) assignOrigin(c, p int, churnDetails *ChurnFile, copyAsIs bool) {
 		b.data[churnDetails.FileName][c-20] = ""
 	}
 }
-	
+
 // GoString prints the results of a Blame using git-blame's style.
 func (b *blame) GoString() string {
 	var buf bytes.Buffer

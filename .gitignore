@@ -6,3 +6,4 @@ repos/*
 go-git-churn
 logs/
 .DS_Store
+outputs/
