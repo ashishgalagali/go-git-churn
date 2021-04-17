@@ -62,6 +62,7 @@ func Blame(c *object.Commit, path string) (*BlameResult, error) {
 	b := new(blame)
 	b.fRev = c
 	//b.pRev = p
+	// TODO: filter is path is not empty
 	b.path = path
 
 	// get all the file revisions

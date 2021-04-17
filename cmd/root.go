@@ -2,14 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ashishgalagali/go-git-churn/helper"
 	"github.com/ashishgalagali/go-git-churn/metrics"
-	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/spf13/cobra"
 	//"io/ioutil"
 	"os"
-	"strings"
-	"unicode"
 )
 
 func init() {
@@ -17,25 +13,27 @@ func init() {
 	pf := rootCmd.PersistentFlags()
 	pf.StringVarP(&repoUrl, "repo", "r", "", "Git Repository URL on which the churn metrics has to be computed")
 	//print.CheckIfError(cobra.MarkFlagRequired(pf, "repo"))
-	pf.StringVarP(&commitId, "commit", "c", "", "Commit hash for which the metrics has to be computed")
-	//print.CheckIfError(cobra.MarkFlagRequired(pf, "commit"))
-	pf.StringVarP(&filepath, "filepath", "f", "", "File path for the file on which the commit metrics has to be computed")
-	pf.StringVarP(&aggregate, "aggregate", "a", "", "Aggregate the churn metrics. \"commit\": Aggregates all files in a commit. \"all\": Aggregate all files all commits and all files")
-	pf.BoolVarP(&whitespace, "whitespace", "w", true, "Excludes whitespaces while calculating the churn metrics is set to false")
-	pf.BoolVarP(&jsonOPToFile, "json", "j", false, "Writes the JSON output to a file within a folder named churn-details")
-	pf.BoolVarP(&printOP, "print", "p", true, "Prints the output in a human readable format")
-	pf.BoolVarP(&enableLog, "logging", "l", false, "Enables logging. Defaults to false")
+
+	//TODO: Enhancements
+	//pf.StringVarP(&commitId, "commit", "c", "", "Commit hash for which the metrics has to be computed")
+	////print.CheckIfError(cobra.MarkFlagRequired(pf, "commit"))
+	//pf.StringVarP(&filepath, "filepath", "f", "", "File path for the file on which the commit metrics has to be computed")
+	//pf.StringVarP(&aggregate, "aggregate", "a", "", "Aggregate the churn metrics. \"commit\": Aggregates all files in a commit. \"all\": Aggregate all files all commits and all files")
+	//pf.BoolVarP(&whitespace, "whitespace", "w", true, "Excludes whitespaces while calculating the churn metrics is set to false")
+	//pf.BoolVarP(&jsonOPToFile, "json", "j", false, "Writes the JSON output to a file within a folder named churn-details")
+	//pf.BoolVarP(&printOP, "print", "p", true, "Prints the output in a human readable format")
+	//pf.BoolVarP(&enableLog, "logging", "l", false, "Enables logging. Defaults to false")
 }
 
 var (
-	repoUrl      string
-	commitId     string
-	filepath     string
-	whitespace   bool
-	jsonOPToFile bool
-	printOP      bool
-	aggregate    string
-	enableLog    bool
+	repoUrl  string
+	commitId string
+	filepath string
+	//whitespace   bool
+	//jsonOPToFile bool
+	//printOP      bool
+	//aggregate    string
+	//enableLog    bool
 
 	rootCmd = &cobra.Command{
 		Use:   "git-churn",
@@ -51,32 +49,34 @@ var (
 			//helper.INFO.Println("")
 			//var churnMetrics interface{}
 			var err error
-			commitIds := strings.Split(commitId, "..")
-			firstCommitId := commitIds[0]
-			var secondCommitId = ""
-			if len(commitIds) == 2 {
-				secondCommitId = strings.TrimFunc(commitIds[1], func(r rune) bool {
-					return !unicode.IsLetter(r) && !unicode.IsNumber(r)
-				})
-			}
-			if secondCommitId == "" {
-				commitId = firstCommitId
-				firstCommitId = ""
-			} else {
-				commitId = secondCommitId
-			}
+
+			//commitIds := strings.Split(commitId, "..")
+			//firstCommitId := commitIds[0]
+			//var secondCommitId = ""
+			//if len(commitIds) == 2 {
+			//	secondCommitId = strings.TrimFunc(commitIds[1], func(r rune) bool {
+			//		return !unicode.IsLetter(r) && !unicode.IsNumber(r)
+			//	})
+			//}
+			//if secondCommitId == "" {
+			//	commitId = firstCommitId
+			//	firstCommitId = ""
+			//} else {
+			//	commitId = secondCommitId
+			//}
 
 			if repoUrl == "" {
 				repoUrl = "."
 			}
 			//repo := metrics.GetRepo(repoUrl)
 			//print.PrintInBlue(repoUrl + " " + commitId + " " + filepath + " " + firstCommitId)
-			helper.INFO.Println("Generating git-churn for the following: \n" + "Repo:" + repoUrl + " " + " commitId:" + commitId + " " + " filepath:" + filepath + " " + " firstCommitId:" + firstCommitId)
-			r := metrics.Checkout("https://github.com/ashishgalagali/SWEN610-project", "7368d5fcb7eec950161ed9d13b55caf5961326b6")
+			//helper.INFO.Println("Generating git-churn for the following: \n" + "Repo:" + repoUrl + " " + " commitId:" + commitId + " " + " filepath:" + filepath + " " + " firstCommitId:" + firstCommitId)
 
-			h, err := r.ResolveRevision(plumbing.Revision("7368d5fcb7eec950161ed9d13b55caf5961326b6"))
-			CheckIfError(err)
-			commitObj, err := r.CommitObject(*h)
+			//r := metrics.Checkout("https://github.com/ashishgalagali/SWEN610-project", "7368d5fcb7eec950161ed9d13b55caf5961326b6")
+			//
+			//h, err := r.ResolveRevision(plumbing.Revision("7368d5fcb7eec950161ed9d13b55caf5961326b6"))
+			//CheckIfError(err)
+			commitObj := metrics.LastCommit(repoUrl)
 			CheckIfError(err)
 			_, err = metrics.Blame(commitObj, "")
 
