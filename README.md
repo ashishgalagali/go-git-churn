@@ -23,7 +23,7 @@ The output will be written to output.json pile in the folder outputs
 ## Options
 ```
 Flags:
-  -c, --commit string      Commit hash for which the metrics has to be computed
+  -r, --repo string        Git Repository URL on which the churn metrics has to be computed
   -h, --help               help for git-churn
 ```
 
