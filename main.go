@@ -26,13 +26,13 @@ func main() {
 	runtime.GOMAXPROCS(numcpu)
 	cmd.Execute()
 
-
+	// Use this to run on the IDE
 	//r := metrics.Checkout("https://github.com/ashishgalagali/SWEN610-project", "7368d5fcb7eec950161ed9d13b55caf5961326b6")
 	//
 	//h, err := r.ResolveRevision(plumbing.Revision("7368d5fcb7eec950161ed9d13b55caf5961326b6"))
 	//cmd.CheckIfError(err)
 	//commitObj, err := r.CommitObject(*h)
 	//cmd.CheckIfError(err)
-	//_, err = metrics.Blame(commitObj, "")
+	//_, err = metrics.Blame(commitObj, "", "3d5168fbca9299add91a28464d9c7586aa66d58f")
 
 }

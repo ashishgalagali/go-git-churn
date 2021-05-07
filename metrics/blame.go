@@ -26,7 +26,7 @@ type BlameResult struct {
 
 // Blame returns a BlameResult with the information about the last author of
 // each line from file `path` at commit `c`.
-func Blame(c *object.Commit, path string) (*BlameResult, error) {
+func Blame(c *object.Commit, path string, lastCommitId string) (*BlameResult, error) {
 	// The file to blame is identified by the input arguments:
 	// commit and path. commit is a Commit object obtained from a Repository. Path
 	// represents a path to a specific file contained into the repository.
@@ -65,6 +65,7 @@ func Blame(c *object.Commit, path string) (*BlameResult, error) {
 	//b.pRev = p
 	// TODO: filter is path is not empty
 	b.path = path
+	b.lastCommitId = lastCommitId
 
 	// get all the file revisions
 	if err := b.fillRevs(); err != nil {
@@ -178,7 +179,8 @@ func newLines(contents []string, commits []*object.Commit) ([]*Line, error) {
 // inputs, outputs and state.
 type blame struct {
 	// the path of the file to blame
-	path string
+	path         string
+	lastCommitId string
 	// the commit of the final revision of the file to blame
 	fRev *object.Commit
 
@@ -221,9 +223,10 @@ func (b *blame) fillGraphAndData() error {
 		b.commitIndexMap[rev.Hash.String()] = i
 	}
 
+	var opFileName = "outputs/output_" + time.Now().UTC().Format("2006-01-02T15:04:05-0700") + ".json"
 	// for every revision of the file, starting with the first
 	// one...
-	helper.AppendToFile("outputs/output.json", "[")
+	helper.AppendToFile(opFileName, "[")
 	for i, rev := range b.revs {
 		//cTree, _ := rev.Tree()
 		//if rev.Hash.String() == "e15b720263903680264fdfb124749b6f386d51e6" {
@@ -233,91 +236,97 @@ func (b *blame) fillGraphAndData() error {
 		//	changes, _ := cTree.Diff(pTree)
 		//	print(changes)
 		//}
+		if b.lastCommitId != "" && b.lastCommitId == rev.Hash.String() {
+			break
+		}
 
 		ittr, _ := rev.Files()
 		commitFiles := make([]ChurnFile, 0)
 		for {
 			file, err := ittr.Next()
+
 			if file == nil {
 				break
 			}
-			churnDetails := new(ChurnFile)
-			churnDetails.FileName = file.Name
-			// get the contents of the file
-			//file, err := rev.Filele(b.path)
-			if err != nil {
-				return nil
-			}
-			if _, ok := b.data[file.Name]; !ok {
-				//do something here
-				b.data[file.Name] = make([]string, len(b.revs))
-			}
-			b.data[file.Name][i], err = file.Contents()
-			if err != nil {
-				return err
-			}
-			nLines := countLines(b.data[file.Name][i])
-			// create a node for each line
-			if _, ok := b.graph[file.Name]; !ok {
-				//do something here
-				b.graph[file.Name] = make([][]*object.Commit, len(b.revs))
-			}
-			b.graph[file.Name][i] = make([]*object.Commit, nLines)
-			// assign a commit to each node
-			// if this is the first revision, then the node is assigned to
-			// this first commit.
-			if i == 0 {
-				for j := 0; j < nLines; j++ {
-					b.graph[file.Name][i][j] = b.revs[i]
+			if (b.path != "" && b.path == file.Name) || (b.path == "") {
+				churnDetails := new(ChurnFile)
+				churnDetails.FileName = file.Name
+				// get the contents of the file
+				//file, err := rev.Filele(b.path)
+				if err != nil {
+					return nil
 				}
-			} else {
-				// if this is not the first commit, then assign to the old
-				// commit or to the new one, depending on what the diff
-				// says.
-
-				//if strings.Contains(rev.Message, "Merge pull request"){
-				//	continue
-				//}
-				//Setting it to MAX=1
-				nearestParent := len(b.revs) + 1
-				iter := rev.Parents()
-				count := 0
-				for {
-					parent, _ := iter.Next()
-					if parent == nil {
-						break
+				if _, ok := b.data[file.Name]; !ok {
+					//do something here
+					b.data[file.Name] = make([]string, len(b.revs))
+				}
+				b.data[file.Name][i], err = file.Contents()
+				if err != nil {
+					return err
+				}
+				nLines := countLines(b.data[file.Name][i])
+				// create a node for each line
+				if _, ok := b.graph[file.Name]; !ok {
+					//do something here
+					b.graph[file.Name] = make([][]*object.Commit, len(b.revs))
+				}
+				b.graph[file.Name][i] = make([]*object.Commit, nLines)
+				// assign a commit to each node
+				// if this is the first revision, then the node is assigned to
+				// this first commit.
+				if i == 0 {
+					for j := 0; j < nLines; j++ {
+						b.graph[file.Name][i][j] = b.revs[i]
 					}
-					count++
-					//if count > 1 && strings.Contains(parent.Message, "Merge pull request") {
-					//	break
+				} else {
+					// if this is not the first commit, then assign to the old
+					// commit or to the new one, depending on what the diff
+					// says.
+
+					//if strings.Contains(rev.Message, "Merge pull request"){
+					//	continue
 					//}
-					//if count > 1 {
-					//	break
-					//}
-					parentIndex := b.commitIndexMap[parent.Hash.String()]
-					if nearestParent > parentIndex {
-						if count > 1 {
-							if !strings.Contains(parent.Message, "Merge pull request") {
+					//Setting it to MAX=1
+					nearestParent := len(b.revs) + 1
+					iter := rev.Parents()
+					count := 0
+					for {
+						parent, _ := iter.Next()
+						if parent == nil {
+							break
+						}
+						count++
+						//if count > 1 && strings.Contains(parent.Message, "Merge pull request") {
+						//	break
+						//}
+						//if count > 1 {
+						//	break
+						//}
+						parentIndex := b.commitIndexMap[parent.Hash.String()]
+						if nearestParent > parentIndex {
+							if count > 1 {
+								if !strings.Contains(parent.Message, "Merge pull request") {
+									nearestParent = parentIndex
+								}
+							} else {
 								nearestParent = parentIndex
 							}
-						} else {
+						} else if !strings.Contains(parent.Message, "Merge pull request") {
 							nearestParent = parentIndex
 						}
-					} else if !strings.Contains(parent.Message, "Merge pull request") {
-						nearestParent = parentIndex
+						//if nearestParent > parentIndex {
+						//	nearestParent = parentIndex
+						//}
 					}
-					//if nearestParent > parentIndex {
-					//	nearestParent = parentIndex
-					//}
+					if count == 1 {
+						b.assignOrigin(i, nearestParent, churnDetails, false)
+					} else {
+						b.assignOrigin(i, nearestParent, churnDetails, true)
+					}
 				}
-				if count == 1 {
-					b.assignOrigin(i, nearestParent, churnDetails, false)
-				} else {
-					b.assignOrigin(i, nearestParent, churnDetails, true)
+				if len(churnDetails.InteractiveChurn) != 0 || len(churnDetails.SelfChurn) != 0 {
+					commitFiles = append(commitFiles, *churnDetails)
 				}
-			}
-			if len(churnDetails.InteractiveChurn) != 0 || len(churnDetails.SelfChurn) != 0 {
-				commitFiles = append(commitFiles, *churnDetails)
 			}
 		}
 		//if len(commitFiles) != 0 {
@@ -331,14 +340,14 @@ func (b *blame) fillGraphAndData() error {
 		}
 		data, _ := json.Marshal(churn)
 		if i != 0 {
-			helper.AppendToFile("outputs/output.json", ",")
+			helper.AppendToFile(opFileName, ",")
 		}
-		helper.AppendToFile("outputs/output.json", string(data)+"\n")
+		helper.AppendToFile(opFileName, string(data)+"\n")
 		//fmt.Printf("%s\n", data)
 		//fmt.Println("\n")
 		//}
 	}
-	helper.AppendToFile("outputs/output.json", "]")
+	helper.AppendToFile(opFileName, "]")
 	return nil
 }
 
